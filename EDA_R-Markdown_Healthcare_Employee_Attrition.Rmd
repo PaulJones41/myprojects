@@ -105,7 +105,14 @@ plotbar_percent <- function(df,x){
     theme(legend.position="bottom", legend.direction = "horizontal")
 }
 
-## Nest data frames for each variable and create plots against attrition
+nested_data_type <- function(df){
+  df[[1]] %>% 
+    is.numeric()
+}
+
+
+
+# Nest data frames for each variable and create plots against attrition
 training_nested <- training %>%
   names() %>% 
   tibble(data = .) %>% 
@@ -115,13 +122,29 @@ training_nested <- training %>%
     ,nested_line = map2(.x=nested_df,.y=data,plotline)
     ,nested_box = map2(.x=nested_df,.y=data,plotbox)
     ,nested_bar_per = map2(.x=nested_df,.y=data,plotbar_percent)
+    ,data_type_fct = unlist(map(.x=nested_df,nested_data_type))
+  ) %>% 
+  rowwise() %>% 
+  mutate(
+    arrange_plot = ggarrange(
+      nested_hist
+      ,nested_bar_per
+      #,print(nested_box)
+      #,print(nested_line)
+      #,ncol=2
+      ,nrow=2
+      ,common.legend = TRUE
+      ,legend="bottom")
   )
+
 
 
 training_nested %>% 
   filter(data == "BusinessTravel") %>% 
   select(nested_df) %>% 
-  unnest() %>% 
+  unnest(cols = c(nested_df)) %>% 
+  select(1) %>% 
+  is.numeric()
   ggplot(aes(x = BusinessTravel, fill = Attrition)) +
     geom_bar(position = "fill") + 
     ylab("proportion") +
