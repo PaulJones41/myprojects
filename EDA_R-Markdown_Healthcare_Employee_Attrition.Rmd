@@ -143,10 +143,16 @@ print(training_nested$nested_box[[2]])
 print(training_nested$nested_line[[2]])
 print(training_nested$nested_bar_per[[2]])
 
-grid.arrange(arrangeGrob(print(training_nested$nested_hist[[2]]), print(training_nested$nested_bar_per[[2]]), ncol = 2)
-             ,arrangeGrob(print(training_nested$nested_box[[2]]), print(training_nested$nested_line[[2]]), ncol = 2)
-             ,nrow = 2
-)
+ggarrange(
+  print(training_nested$nested_hist[[2]])
+  ,print(training_nested$nested_bar_per[[2]])
+  ,print(training_nested$nested_box[[2]])
+  ,print(training_nested$nested_line[[2]])
+  ,ncol=2
+  ,nrow=2
+  ,common.legend = TRUE
+  ,legend="bottom")
+
 
 ```
 
