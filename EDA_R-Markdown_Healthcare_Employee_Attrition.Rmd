@@ -1,0 +1,551 @@
+---
+title: "20220829_EDA_R_Markdown_Healthcare_Employee_Attrition"
+author: "Paul Jones"
+date: "2022-08-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load packages, include=FALSE}
+library(tidyverse)
+library(lubridate)
+library(zoo)
+library(purrr)
+library(skimr)
+library(kableExtra)
+library(caret)
+library(ggpubr)
+```
+
+```{r import data}
+employee_health_raw <- tibble(read_csv("watson_healthcare_modified.csv"))
+```
+
+```{r}
+employee_health_clean <- employee_health_raw %>% 
+  mutate(
+    Age = as.numeric(Age)
+    ,Attrition = as.factor(Attrition)
+    ,BusinessTravel = as.factor(BusinessTravel)
+    ,DailyRate = as.numeric(DailyRate)
+    ,Department = as.factor(Department)
+    ,DistanceFromHome = as.numeric(DistanceFromHome)
+    ,Education = as.numeric(Education)
+    ,EducationField = as.factor(EducationField)
+    ,EmployeeCount = as.numeric(EmployeeCount)
+    ,EnvironmentSatisfaction = as.numeric(EnvironmentSatisfaction)
+    ,Gender = as.factor(Gender)
+    ,HourlyRate = as.numeric(HourlyRate)
+    ,JobInvolvement = as.numeric(JobInvolvement)
+    ,JobLevel = as.numeric(JobLevel)
+    ,JobRole = as.factor(JobRole)
+    ,JobSatisfaction = as.numeric(JobSatisfaction)
+    ,MaritalStatus = as.factor(MaritalStatus)
+    ,MonthlyIncome = as.numeric(MonthlyIncome)
+    ,MonthlyRate = as.numeric(MonthlyRate)
+    ,NumCompaniesWorked = as.numeric(NumCompaniesWorked)
+    ,Over18 = as.factor(Over18)
+    ,OverTime = as.factor(OverTime)
+    ,PercentSalaryHike = as.numeric(PercentSalaryHike)
+    ,PerformanceRating = as.numeric(PerformanceRating)
+    ,RelationshipSatisfaction = as.numeric(RelationshipSatisfaction)
+    ,StandardHours = as.numeric(StandardHours)
+    ,Shift = as.numeric(Shift)
+    ,TotalWorkingYears = as.numeric(TotalWorkingYears)
+    ,TrainingTimesLastYear = as.numeric(TrainingTimesLastYear)
+    ,WorkLifeBalance = as.numeric(WorkLifeBalance)
+    ,YearsAtCompany = as.numeric(YearsAtCompany)
+    ,YearsInCurrentRole = as.numeric(YearsInCurrentRole)
+    ,YearsSinceLastPromotion = as.numeric(YearsSinceLastPromotion)
+    ,YearsWithCurrManager = as.numeric(YearsWithCurrManager)
+)
+```
+
+```{r split data into training and test sets}
+a <- createDataPartition(employee_health_clean$Attrition, p = 0.7, list=FALSE)
+training <- employee_health_clean[a,]
+test <- employee_health_clean[-a,]
+```
+
+```{r}
+skimr::skim(training)
+```
+
+```{r}
+str(training)
+```
+
+```{r}
+# Function to plot the plots
+plothist <- function(df,x){
+  ggplot(data = df) +
+    geom_histogram(aes(x=.data[[x]],fill=Attrition), stat = "count")
+}
+
+plotline <- function(df,x){
+  ggplot(data = df,aes(x=.data[[x]],group=Attrition,color=Attrition)) +
+    geom_line(stat = "count")
+}
+
+plotbox <- function(df,x){
+  ggplot(data = df,aes(x=.data[[x]],group=Attrition,color=Attrition)) +
+    geom_boxplot()
+}
+
+plotbar_percent <- function(df,x){
+  ggplot(data = df, aes(x = .data[[x]], fill = Attrition)) +
+    geom_bar(position = "fill") + 
+    ylab("proportion") +
+    stat_count(geom = "text", 
+               aes(label = stat(count)),
+               position=position_fill(vjust=0.5), colour="white") +
+    theme(legend.position="bottom", legend.direction = "horizontal")
+}
+
+## Nest data frames for each variable and create plots against attrition
+training_nested <- training %>%
+  names() %>% 
+  tibble(data = .) %>% 
+  mutate(nested_df = map(data,~training %>% select(.x,Attrition))) %>% 
+  mutate(
+    nested_hist = map2(.x=nested_df,.y=data,plothist)
+    ,nested_line = map2(.x=nested_df,.y=data,plotline)
+    ,nested_box = map2(.x=nested_df,.y=data,plotbox)
+    ,nested_bar_per = map2(.x=nested_df,.y=data,plotbar_percent)
+  )
+
+
+training_nested %>% 
+  filter(data == "BusinessTravel") %>% 
+  select(nested_df) %>% 
+  unnest() %>% 
+  ggplot(aes(x = BusinessTravel, fill = Attrition)) +
+    geom_bar(position = "fill") + 
+    ylab("proportion") +
+    stat_count(geom = "text", 
+               aes(label = stat(count)),
+               position=position_fill(vjust=0.5), colour="white")
+  
+training_nested %>% 
+  filter(data == "EmployeeCount") %>% 
+  select(nested_df) %>% 
+  unnest()
+```
+
+## Age
+
+```{r}
+print(training_nested$nested_hist[[2]])
+print(training_nested$nested_box[[2]])
+print(training_nested$nested_line[[2]])
+print(training_nested$nested_bar_per[[2]])
+
+grid.arrange(arrangeGrob(print(training_nested$nested_hist[[2]]), print(training_nested$nested_bar_per[[2]]), ncol = 2)
+             ,arrangeGrob(print(training_nested$nested_box[[2]]), print(training_nested$nested_line[[2]]), ncol = 2)
+             ,nrow = 2
+)
+
+```
+
+```{r}
+print(training_nested$nested_box[[2]])
+```
+
+```{r}
+print(training_nested$nested_line[[2]])
+```
+
+```{r}
+print(training_nested$nested_bar_per[[2]])
+```
+
+## Business Travel
+
+```{r}
+print(training_nested$nested_hist[[4]])
+```
+
+```{r}
+print(training_nested$nested_bar_per[[4]])
+```
+
+## Daily Rate
+
+```{r}
+print(training_nested$nested_hist[[5]])
+```
+
+```{r}
+print(training_nested$nested_box[[5]])
+```
+
+## Department
+
+```{r}
+print(training_nested$nested_hist[[6]])
+```
+
+```{r}
+print(training_nested$nested_bar_per[[6]])
+```
+
+
+## Distance From Home
+
+```{r}
+print(training_nested$nested_hist[[7]])
+```
+
+```{r}
+print(training_nested$nested_bar_per[[7]])
+```
+
+```{r}
+print(training_nested$nested_box[[7]])
+```
+
+```{r}
+print(training_nested$nested_line[[7]])
+```
+
+## Education
+
+```{r}
+print(training_nested$nested_hist[[8]])
+```
+
+```{r}
+print(training_nested$nested_bar_per[8])
+```
+
+## Education Field
+
+```{r}
+print(training_nested$nested_hist[[9]])
+```
+
+```{r}
+print(training_nested$nested_bar_per[[9]])
+```
+
+## EmployeeCount
+
+```{r}
+print(training_nested$nested_hist[[10]])
+```
+
+Feature adds no additional information to the model.
+
+## Environment Satisfaction
+
+```{r}
+print(training_nested$nested_hist[[11]])
+```
+
+```{r}
+print(training_nested$nested_bar_per[[11]])
+```
+
+## Gender
+
+```{r}
+print(training_nested$nested_hist[[12]])
+```
+
+```{r}
+print(training_nested$nested_bar_per[[12]])
+```
+
+## Hourly Rate
+
+```{r}
+print(training_nested$nested_hist[[13]])
+```
+
+```{r}
+print(training_nested$nested_bar_per[[13]])
+```
+
+```{r}
+print(training_nested$nested_box[[13]])
+```
+
+```{r}
+print(training_nested$nested_line[[13]])
+```
+
+## Job Involvement
+
+```{r}
+print(training_nested$nested_hist[[14]])
+```
+
+```{r}
+print(training_nested$nested_bar_per[[14]])
+```
+
+## Job Level
+
+```{r}
+print(training_nested$nested_hist[[15]])
+```
+
+```{r}
+print(training_nested$nested_bar_per[[15]])
+```
+
+## Job Role
+
+```{r}
+print(training_nested$nested_hist[[16]])
+```
+
+```{r}
+print(training_nested$nested_bar_per[[16]])
+```
+
+## Job Satisfaction
+
+```{r}
+print(training_nested$nested_hist[[17]])
+```
+
+```{r}
+print(training_nested$nested_bar_per[[17]])
+```
+
+## Marital Status
+
+```{r}
+print(training_nested$nested_hist[[18]])
+```
+
+```{r}
+print(training_nested$nested_bar_per[[18]])
+```
+
+## Monthly Income
+
+```{r}
+print(training_nested$nested_hist[[19]])
+```
+
+```{r}
+print(training_nested$nested_box[[19]])
+```
+
+## Monthly Rate
+
+```{r}
+print(training_nested$nested_hist[[20]])
+```
+
+```{r}
+print(training_nested$nested_box[[20]])
+```
+
+## Num Companies Worked
+
+```{r}
+print(training_nested$nested_hist[[21]])
+```
+
+```{r}
+print(training_nested$nested_bar_per[[21]])
+```
+
+```{r}
+print(training_nested$nested_line[[21]])
+```
+
+```{r}
+print(training_nested$nested_box[[21]])
+```
+
+## Over 18
+
+```{r}
+print(training_nested$nested_hist[[22]])
+```
+
+Feature doesn't add any additional information to model.
+
+## Over Time
+
+```{r}
+print(training_nested$nested_hist[[23]])
+```
+
+```{r}
+print(training_nested$nested_bar_per[[23]])
+```
+
+## Percent SalaryHike
+
+```{r}
+print(training_nested$nested_hist[[24]])
+```
+
+## Performance Rating
+
+```{r}
+print(training_nested$nested_hist[[25]])
+```
+
+## Relationship Satisfaction
+
+```{r}
+print(training_nested$nested_hist[[26]])
+```
+
+## Standard Hours
+
+```{r}
+print(training_nested$nested_hist[[27]])
+```
+
+## Shift
+
+```{r}
+print(training_nested$nested_hist[[28]])
+```
+
+## Total Working Years
+
+```{r}
+print(training_nested$nested_hist[[29]])
+```
+
+## Training Times Last Year
+
+```{r}
+print(training_nested$nested_hist[[30]])
+```
+
+## Work Life Balance
+
+```{r}
+print(training_nested$nested_hist[[31]])
+```
+
+```{r}
+print(training_nested$nested_bar_per[[35]])
+```
+
+```{r}
+print(training_nested$nested_box[[35]])
+```
+
+```{r}
+print(training_nested$nested_line[[35]])
+```
+
+## Years At Company
+
+```{r}
+print(training_nested$nested_hist[[32]])
+```
+
+```{r}
+print(training_nested$nested_bar_per[[32]])
+```
+
+```{r}
+print(training_nested$nested_box[[32]])
+```
+
+```{r}
+print(training_nested$nested_line[[32]])
+```
+
+## Years In Current Role
+
+```{r}
+print(training_nested$nested_hist[[33]])
+```
+
+```{r}
+print(training_nested$nested_bar_per[[33]])
+```
+
+```{r}
+print(training_nested$nested_box[[33]])
+```
+
+```{r}
+print(training_nested$nested_line[[33]])
+```
+
+## Years Since Last Promotion
+
+```{r}
+print(training_nested$nested_hist[[34]])
+```
+
+```{r}
+print(training_nested$nested_bar_per[[34]])
+```
+
+```{r}
+print(training_nested$nested_box[[34]])
+```
+
+```{r}
+print(training_nested$nested_line[[34]])
+```
+
+## Years With Current Manager
+
+```{r}
+print(training_nested$nested_hist[[35]])
+```
+
+```{r}
+print(training_nested$nested_bar_per[[35]])
+```
+
+```{r}
+print(training_nested$nested_box[[35]])
+```
+
+```{r}
+print(training_nested$nested_line[[35]])
+```
+
+## Modelling
+
+```{r}
+rf_model <- randomForest::randomForest(Attrition ~., training[2:35], ntree=50)
+
+rf_model
+
+test %>% 
+  mutate(results = predict(rf_model, newdata = test, type = "prob"))
+
+new <- test
+
+bind_cols(test, as_tibble(predict(rf_model, newdata = test, type = "prob")))
+as_tibble(predict(rf_model, newdata = test, type = "prob"))
+
+
+
+# Predicting the Test set results
+y_pred <- predict(rf_model, newdata = test, type = "prob")
+
+# Confusion Matrix
+confusion_mtx <- confusionMatrix(y_pred, reference = test$Attrition)
+confusion_mtx
+
+# Plotting model
+plot(rf_model)
+
+# Importance plot
+randomForest::varImpPlot(rf_model)
+
+# Variable importance plot
+randomForest::importance(rf_model)
+
+```
