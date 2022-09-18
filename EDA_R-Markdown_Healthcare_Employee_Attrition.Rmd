@@ -110,8 +110,6 @@ nested_data_type <- function(df){
     is.numeric()
 }
 
-
-
 # Nest data frames for each variable and create plots against attrition
 training_nested <- training %>%
   names() %>% 
@@ -123,10 +121,14 @@ training_nested <- training %>%
     ,nested_box = map2(.x=nested_df,.y=data,plotbox)
     ,nested_bar_per = map2(.x=nested_df,.y=data,plotbar_percent)
     ,data_type_fct = unlist(map(.x=nested_df,nested_data_type))
-  ) %>% 
+    ,ggarr = map2(.x = nested_hist, .y = nested_bar_per, ~ ggarrange(.x,.y,ncol = 2))
+  )
+
+print(training_nested$ggarr[[1]])
+
   rowwise() %>% 
   mutate(
-    arrange_plot = ggarrange(
+    arrange_plot = list(ggarrange(
       nested_hist
       ,nested_bar_per
       #,print(nested_box)
@@ -135,13 +137,9 @@ training_nested <- training %>%
       ,nrow=2
       ,common.legend = TRUE
       ,legend="bottom")
-  )
+  ))
 
-
-
-training_nested %>% 
-  filter(data == "BusinessTravel") %>% 
-  select(nested_df) %>% 
+  
   unnest(cols = c(nested_df)) %>% 
   select(1) %>% 
   is.numeric()
@@ -153,9 +151,9 @@ training_nested %>%
                position=position_fill(vjust=0.5), colour="white")
   
 training_nested %>% 
-  filter(data == "EmployeeCount") %>% 
-  select(nested_df) %>% 
-  unnest()
+  filter(data == "Age") %>% 
+  select(arrange_plot) %>% 
+  unnest(cols = c(arrange_plot))
 ```
 
 ## Age
