@@ -130,145 +130,54 @@ training_nested <- training %>%
       ,data_type_fct == FALSE ~ map2(.x = nested_hist, .y = nested_bar_per, 
         ~ ggarrange(.x,.y,nrow = 2, common.legend = TRUE, legend="bottom"))
   ))
-
-  rowwise() %>% 
-  mutate(
-    arrange_plot = list(ggarrange(
-      nested_hist
-      ,nested_bar_per
-      #,print(nested_box)
-      #,print(nested_line)
-      #,ncol=2
-      ,nrow=2
-      ,common.legend = TRUE
-      ,legend="bottom")
-  ))
-
-  
-  unnest(cols = c(nested_df)) %>% 
-  select(1) %>% 
-  is.numeric()
-  ggplot(aes(x = BusinessTravel, fill = Attrition)) +
-    geom_bar(position = "fill") + 
-    ylab("proportion") +
-    stat_count(geom = "text", 
-               aes(label = stat(count)),
-               position=position_fill(vjust=0.5), colour="white")
-  
-training_nested %>% 
-  filter(data == "Age") %>% 
-  select(arrange_plot) %>% 
-  unnest(cols = c(arrange_plot))
-
-print(training_nested$ggarr[[2]])
 ```
 
 ## Age
 
 ```{r}
-print(training_nested$nested_hist[[2]])
-print(training_nested$nested_box[[2]])
-print(training_nested$nested_line[[2]])
-print(training_nested$nested_bar_per[[2]])
-
-ggarrange(
-  print(training_nested$nested_hist[[2]])
-  ,print(training_nested$nested_bar_per[[2]])
-  ,print(training_nested$nested_box[[2]])
-  ,print(training_nested$nested_line[[2]])
-  ,ncol=2
-  ,nrow=2
-  ,common.legend = TRUE
-  ,legend="bottom")
-
-
-```
-
-```{r}
-print(training_nested$nested_box[[2]])
-```
-
-```{r}
-print(training_nested$nested_line[[2]])
-```
-
-```{r}
-print(training_nested$nested_bar_per[[2]])
+print(training_nested$ggarr[[2]])
 ```
 
 ## Business Travel
 
 ```{r}
-print(training_nested$nested_hist[[4]])
-```
-
-```{r}
-print(training_nested$nested_bar_per[[4]])
+print(training_nested$ggarr[[4]])
 ```
 
 ## Daily Rate
 
 ```{r}
-print(training_nested$nested_hist[[5]])
-```
-
-```{r}
-print(training_nested$nested_box[[5]])
+print(training_nested$ggarr[[5]])
 ```
 
 ## Department
 
 ```{r}
-print(training_nested$nested_hist[[6]])
+print(training_nested$ggarr[[6]])
 ```
-
-```{r}
-print(training_nested$nested_bar_per[[6]])
-```
-
 
 ## Distance From Home
 
 ```{r}
-print(training_nested$nested_hist[[7]])
-```
-
-```{r}
-print(training_nested$nested_bar_per[[7]])
-```
-
-```{r}
-print(training_nested$nested_box[[7]])
-```
-
-```{r}
-print(training_nested$nested_line[[7]])
+print(training_nested$ggarr[[7]])
 ```
 
 ## Education
 
 ```{r}
-print(training_nested$nested_hist[[8]])
-```
-
-```{r}
-print(training_nested$nested_bar_per[8])
+print(training_nested$ggarr[[8]])
 ```
 
 ## Education Field
 
 ```{r}
-print(training_nested$nested_hist[[9]])
-```
-
-```{r}
-print(training_nested$nested_bar_per[[9]])
+print(training_nested$ggarr[[9]])
 ```
 
 ## EmployeeCount
 
 ```{r}
-print(training_nested$nested_hist[[10]])
+print(training_nested$ggarr[[10]])
 ```
 
 Feature adds no additional information to the model.
@@ -276,133 +185,73 @@ Feature adds no additional information to the model.
 ## Environment Satisfaction
 
 ```{r}
-print(training_nested$nested_hist[[11]])
-```
-
-```{r}
-print(training_nested$nested_bar_per[[11]])
+print(training_nested$ggarr[[11]])
 ```
 
 ## Gender
 
 ```{r}
-print(training_nested$nested_hist[[12]])
-```
-
-```{r}
-print(training_nested$nested_bar_per[[12]])
+print(training_nested$ggarr[[12]])
 ```
 
 ## Hourly Rate
 
 ```{r}
-print(training_nested$nested_hist[[13]])
-```
-
-```{r}
-print(training_nested$nested_bar_per[[13]])
-```
-
-```{r}
-print(training_nested$nested_box[[13]])
-```
-
-```{r}
-print(training_nested$nested_line[[13]])
+print(training_nested$ggarr[[13]])
 ```
 
 ## Job Involvement
 
 ```{r}
-print(training_nested$nested_hist[[14]])
-```
-
-```{r}
-print(training_nested$nested_bar_per[[14]])
+print(training_nested$ggarr[[14]])
 ```
 
 ## Job Level
 
 ```{r}
-print(training_nested$nested_hist[[15]])
-```
-
-```{r}
-print(training_nested$nested_bar_per[[15]])
+print(training_nested$ggarr[[15]])
 ```
 
 ## Job Role
 
 ```{r}
-print(training_nested$nested_hist[[16]])
-```
-
-```{r}
-print(training_nested$nested_bar_per[[16]])
+print(training_nested$ggarr[[16]])
 ```
 
 ## Job Satisfaction
 
 ```{r}
-print(training_nested$nested_hist[[17]])
-```
-
-```{r}
-print(training_nested$nested_bar_per[[17]])
+print(training_nested$ggarr[[17]])
 ```
 
 ## Marital Status
 
 ```{r}
-print(training_nested$nested_hist[[18]])
-```
-
-```{r}
-print(training_nested$nested_bar_per[[18]])
+print(training_nested$ggarr[[18]])
 ```
 
 ## Monthly Income
 
 ```{r}
-print(training_nested$nested_hist[[19]])
-```
-
-```{r}
-print(training_nested$nested_box[[19]])
+print(training_nested$ggarr[[19]])
 ```
 
 ## Monthly Rate
 
 ```{r}
-print(training_nested$nested_hist[[20]])
-```
-
-```{r}
-print(training_nested$nested_box[[20]])
+print(training_nested$ggarr[[20]])
 ```
 
 ## Num Companies Worked
 
 ```{r}
-print(training_nested$nested_hist[[21]])
-```
-
-```{r}
-print(training_nested$nested_bar_per[[21]])
-```
-
-```{r}
-print(training_nested$nested_line[[21]])
-```
-
-```{r}
-print(training_nested$nested_box[[21]])
+print(training_nested$ggarr[[21]])
 ```
 
 ## Over 18
 
 ```{r}
-print(training_nested$nested_hist[[22]])
+print(training_nested$ggarr[[22]])
 ```
 
 Feature doesn't add any additional information to model.
@@ -410,143 +259,79 @@ Feature doesn't add any additional information to model.
 ## Over Time
 
 ```{r}
-print(training_nested$nested_hist[[23]])
-```
-
-```{r}
-print(training_nested$nested_bar_per[[23]])
+print(training_nested$ggarr[[23]])
 ```
 
 ## Percent SalaryHike
 
 ```{r}
-print(training_nested$nested_hist[[24]])
+print(training_nested$ggarr[[24]])
 ```
 
 ## Performance Rating
 
 ```{r}
-print(training_nested$nested_hist[[25]])
+print(training_nested$ggarr[[25]])
 ```
 
 ## Relationship Satisfaction
 
 ```{r}
-print(training_nested$nested_hist[[26]])
+print(training_nested$ggarr[[26]])
 ```
 
 ## Standard Hours
 
 ```{r}
-print(training_nested$nested_hist[[27]])
+print(training_nested$ggarr[[27]])
 ```
 
 ## Shift
 
 ```{r}
-print(training_nested$nested_hist[[28]])
+print(training_nested$ggarr[[28]])
 ```
 
 ## Total Working Years
 
 ```{r}
-print(training_nested$nested_hist[[29]])
+print(training_nested$ggarr[[29]])
 ```
 
 ## Training Times Last Year
 
 ```{r}
-print(training_nested$nested_hist[[30]])
+print(training_nested$ggarr[[30]])
 ```
 
 ## Work Life Balance
 
 ```{r}
-print(training_nested$nested_hist[[31]])
-```
-
-```{r}
-print(training_nested$nested_bar_per[[35]])
-```
-
-```{r}
-print(training_nested$nested_box[[35]])
-```
-
-```{r}
-print(training_nested$nested_line[[35]])
+print(training_nested$ggarr[[31]])
 ```
 
 ## Years At Company
 
 ```{r}
-print(training_nested$nested_hist[[32]])
-```
-
-```{r}
-print(training_nested$nested_bar_per[[32]])
-```
-
-```{r}
-print(training_nested$nested_box[[32]])
-```
-
-```{r}
-print(training_nested$nested_line[[32]])
+print(training_nested$ggarr[[32]])
 ```
 
 ## Years In Current Role
 
 ```{r}
-print(training_nested$nested_hist[[33]])
-```
-
-```{r}
-print(training_nested$nested_bar_per[[33]])
-```
-
-```{r}
-print(training_nested$nested_box[[33]])
-```
-
-```{r}
-print(training_nested$nested_line[[33]])
+print(training_nested$ggarr[[33]])
 ```
 
 ## Years Since Last Promotion
 
 ```{r}
-print(training_nested$nested_hist[[34]])
-```
-
-```{r}
-print(training_nested$nested_bar_per[[34]])
-```
-
-```{r}
-print(training_nested$nested_box[[34]])
-```
-
-```{r}
-print(training_nested$nested_line[[34]])
+print(training_nested$ggarr[[34]])
 ```
 
 ## Years With Current Manager
 
 ```{r}
-print(training_nested$nested_hist[[35]])
-```
-
-```{r}
-print(training_nested$nested_bar_per[[35]])
-```
-
-```{r}
-print(training_nested$nested_box[[35]])
-```
-
-```{r}
-print(training_nested$nested_line[[35]])
+print(training_nested$ggarr[[35]])
 ```
 
 ## Modelling
