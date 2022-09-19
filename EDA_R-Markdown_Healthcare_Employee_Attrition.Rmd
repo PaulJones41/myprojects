@@ -110,6 +110,10 @@ nested_data_type <- function(df){
     is.numeric()
 }
 
+ggarrange_fct <- function(plot1,plot2,plot3,plot4){
+  ggarrange(plot1, plot2, plot3, plot4, nrow = 2, ncol = 2, common.legend = TRUE, legend="bottom")
+}
+
 # Nest data frames for each variable and create plots against attrition
 training_nested <- training %>%
   names() %>% 
@@ -121,10 +125,11 @@ training_nested <- training %>%
     ,nested_box = map2(.x=nested_df,.y=data,plotbox)
     ,nested_bar_per = map2(.x=nested_df,.y=data,plotbar_percent)
     ,data_type_fct = unlist(map(.x=nested_df,nested_data_type))
-    ,ggarr = map2(.x = nested_hist, .y = nested_bar_per, ~ ggarrange(.x,.y,ncol = 2))
-  )
-
-print(training_nested$ggarr[[1]])
+    ,ggarr = case_when(
+      data_type_fct == TRUE ~ pmap(list(plot1 = nested_hist,  plot2 = nested_bar_per, plot3 = nested_box, plot4 = nested_line), ggarrange_fct)
+      ,data_type_fct == FALSE ~ map2(.x = nested_hist, .y = nested_bar_per, 
+        ~ ggarrange(.x,.y,nrow = 2, common.legend = TRUE, legend="bottom"))
+  ))
 
   rowwise() %>% 
   mutate(
@@ -154,6 +159,8 @@ training_nested %>%
   filter(data == "Age") %>% 
   select(arrange_plot) %>% 
   unnest(cols = c(arrange_plot))
+
+print(training_nested$ggarr[[2]])
 ```
 
 ## Age
