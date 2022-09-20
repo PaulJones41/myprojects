@@ -132,6 +132,43 @@ training_nested <- training %>%
   ))
 ```
 
+```{r}
+ggplotRegression <- function (fit) {
+
+require(ggplot2)
+
+ggplot(fit$model, aes_string(x = names(fit$model)[2], y = names(fit$model)[1],colour = "Attrition")) + 
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = paste("Adj R2 = ",signif(summary(fit)$adj.r.squared, 5),
+                     "Intercept =",signif(fit$coef[[1]],5 ),
+                     " Slope =",signif(fit$coef[[2]], 5),
+                     " P =",signif(summary(fit)$coef[2,4], 5)))
+}
+
+lm_model_create <- function(x, df){
+  lm(Attrition ~ x, data = df)
+}
+
+training_nested_lm <- training %>% 
+  names() %>% 
+  tibble(data = .) %>% 
+  mutate(nested_df = map(data,~training %>% select(.x,Attrition))) %>% 
+  mutate(
+    data_type_fct = unlist(map(.x=nested_df,nested_data_type))
+    ,lm_model = case_when(
+      data_type_fct == TRUE ~ NA
+      ,data_type_fct == FALSE ~
+      map2(.x = data, .y = nested_df,lm_model_create)
+  ))
+  
+ggplotRegression(lm(DailyRate ~ Age + Attrition, data = training))
+
+ggplot(data = training, aes(x=MonthlyIncome,y=Age, colour = Attrition)) +
+         geom_point() +
+         geom_smooth(method = "lm", se = FALSE)
+```
+
 ## Age
 
 ```{r}
@@ -262,7 +299,7 @@ Feature doesn't add any additional information to model.
 print(training_nested$ggarr[[23]])
 ```
 
-## Percent SalaryHike
+## Percent Salary Hike
 
 ```{r}
 print(training_nested$ggarr[[24]])
@@ -336,7 +373,7 @@ print(training_nested$ggarr[[35]])
 
 ## Modelling
 
-```{r}
+```{r eval=FALSE}
 rf_model <- randomForest::randomForest(Attrition ~., training[2:35], ntree=50)
 
 rf_model
