@@ -18,6 +18,8 @@ library(skimr)
 library(kableExtra)
 library(caret)
 library(ggpubr)
+#library(GGally)
+library(corrplot)
 ```
 
 ```{r import data}
@@ -162,12 +164,41 @@ training_nested_lm <- training %>%
       map2(.x = data, .y = nested_df,lm_model_create)
   ))
   
-ggplotRegression(lm(DailyRate ~ Age + Attrition, data = training))
+ggplotRegression(lm(Age ~ MonthlyIncome + Attrition, data = training))
 
 ggplot(data = training, aes(x=MonthlyIncome,y=Age, colour = Attrition)) +
          geom_point() +
          geom_smooth(method = "lm", se = FALSE)
+
+training %>% 
+  select_if(is.numeric) %>%
+  
+  ggpairs()
+
+training_corplot <- training %>% 
+  select_if(is.numeric) %>% 
+  select(-EmployeeCount,-EmployeeID,-StandardHours)
+
+
+corrplot(cor(training_corplot))
 ```
+
+```{r PCA Analysis}
+library(ggfortify)
+
+pca_training <- training %>% 
+  select_if(is.numeric) %>%
+  select(-EmployeeCount,-EmployeeID,-StandardHours) %>% 
+  mutate_all(~(scale(.) %>% as.vector)) %>% 
+  prcomp(.)
+
+summary(pca_training)
+
+autoplot(pca_training, data = training, colour = 'Attrition')
+
+biplot(pca_training)
+```
+
 
 ## Age
 
