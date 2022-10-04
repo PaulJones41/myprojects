@@ -18,6 +18,7 @@ library(skimr)
 library(kableExtra)
 library(caret)
 library(ggpubr)
+library(broom)
 #library(GGally)
 library(corrplot)
 ```
@@ -405,6 +406,19 @@ print(training_nested$ggarr[[35]])
 ## Modelling
 
 ```{r eval=FALSE}
+model_nest <- tribble(
+  ~model_type, ~Parameter_1,  ~Parameter_1_Value, ~Parameter_2, ~Parameter_2_Value
+  ,"rf" ,"ntree"  ,100 ,"mtry" ,16
+  ,"rf" ,"ntree"  ,200  ,"mtry" ,16
+  ,"rf" ,"ntree"  ,400  ,"mtry" ,16
+  ,"rf" ,"ntree"  ,800  ,"mtry" ,16
+  ,"rf" ,"ntree"  ,1600  ,"mtry" ,16
+)
+
+model_nest %>% 
+  mutate(training_df = list(training)
+         ,model = list())
+
 rf_model <- randomForest::randomForest(Attrition ~., training[2:35], ntree=50)
 
 rf_model
@@ -418,6 +432,7 @@ bind_cols(test, as_tibble(predict(rf_model, newdata = test, type = "prob")))
 as_tibble(predict(rf_model, newdata = test, type = "prob"))
 
 
+glance(rf_model)
 
 # Predicting the Test set results
 y_pred <- predict(rf_model, newdata = test, type = "prob")
