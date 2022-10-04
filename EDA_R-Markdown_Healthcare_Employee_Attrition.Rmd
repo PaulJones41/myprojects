@@ -406,18 +406,32 @@ print(training_nested$ggarr[[35]])
 ## Modelling
 
 ```{r eval=FALSE}
-model_nest <- tribble(
-  ~model_type, ~Parameter_1,  ~Parameter_1_Value, ~Parameter_2, ~Parameter_2_Value
-  ,"rf" ,"ntree"  ,100 ,"mtry" ,16
-  ,"rf" ,"ntree"  ,200  ,"mtry" ,16
-  ,"rf" ,"ntree"  ,400  ,"mtry" ,16
-  ,"rf" ,"ntree"  ,800  ,"mtry" ,16
-  ,"rf" ,"ntree"  ,1600  ,"mtry" ,16
-)
+rf_model_fun <- function(df, ntree_value,mtry_value) {
+  randomForest::randomForest(Attrition ~., df[2:35], ntree=ntree_value, mtry=mtry_value)
+}
 
-model_nest %>% 
+
+model_nest <- tribble(
+  ~model_type, ~Parameter_1,  ~Parameter_1_Value
+  ,"rf" ,"ntree"  ,100
+  ,"rf" ,"ntree"  ,200
+  ,"rf" ,"ntree"  ,400
+  ,"rf" ,"ntree"  ,800
+  ,"rf" ,"ntree"  ,1600
+  ,"rf" ,"ntree"  ,3200
+) %>% 
+  mutate(
+    Parameter_2 = "mtry"
+  ) %>% 
+  expand_grid(Parameter_2_Value = c(8,12,16,20,24,30))
+
+model_nest <- model_nest %>% 
   mutate(training_df = list(training)
-         ,model = list())
+         ,model = pmap(list(df = training_df, ntree_value = Parameter_1_Value, mtry_value = Parameter_2_Value), rf_model_fun)
+         ,validate_actual = map(training_df, ~.x$Attrition == "Yes")
+  )
+
+model_nest$model
 
 rf_model <- randomForest::randomForest(Attrition ~., training[2:35], ntree=50)
 
